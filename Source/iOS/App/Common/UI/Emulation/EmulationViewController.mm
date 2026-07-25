@@ -3,11 +3,6 @@
 
 #import "EmulationViewController.h"
 
-#import <FirebaseAnalytics/FirebaseAnalytics.h>
-
-#import <GameController/GameController.h>
-
-#import "Core/ConfigManager.h"
 #import "Core/Config/MainSettings.h"
 #import "Core/Core.h"
 #import "Core/Host.h"
@@ -16,7 +11,6 @@
 
 #import "EmulationBootParameter.h"
 #import "EmulationCoordinator.h"
-#import "FoundationStringUtil.h"
 #import "HostNotifications.h"
 #import "LocalizationUtil.h"
 #import "JitManager.h"
@@ -44,6 +38,12 @@
   self.pauseButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemPause target:self action:@selector(pausePressed)];
   self.playButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemPlay target:self action:@selector(playPressed)];
   self.hideBarButton = [[UIBarButtonItem alloc] initWithImage:[UIImage systemImageNamed:@"eye.slash"] style:UIBarButtonItemStylePlain target:self action:@selector(hideBarPressed)];
+
+  self.stopButton.accessibilityLabel = @"Stop Emulation";
+  self.pauseButton.accessibilityLabel = @"Pause Emulation";
+  self.playButton.accessibilityLabel = @"Resume Emulation";
+  self.hideBarButton.accessibilityLabel = @"Hide Emulation Menu";
+  self.navigationItem.leftBarButtonItem.accessibilityLabel = @"Emulation Settings";
   
   self.navigationItem.rightBarButtonItems = @[
     self.stopButton,
@@ -77,7 +77,7 @@
     } else if ([self checkIfNeedToShowNKitWarning]) {
       [self showNKitWarning];
     } else {
-      [self startEmulation];
+      [self startEmulationAfterPerformanceCheck];
     }
     
     _didStartEmulation = true;
@@ -105,7 +105,7 @@
     if ([self checkIfNeedToShowNKitWarning]) {
       [self showNKitWarning];
     } else {
-      [self startEmulation];
+      [self startEmulationAfterPerformanceCheck];
     }
   }];
 }
@@ -129,11 +129,52 @@
 - (void)didFinishNKitWarningScreenWithResult:(BOOL)result sender:(id)sender {
   [self dismissViewControllerAnimated:true completion:^{
     if (result) {
-      [self startEmulation];
+      [self startEmulationAfterPerformanceCheck];
     } else {
       [self.navigationController dismissViewControllerAnimated:true completion:nil];
     }
   }];
+}
+
+- (void)startEmulationAfterPerformanceCheck {
+  NSProcessInfo* processInfo = NSProcessInfo.processInfo;
+  BOOL lowPowerModeEnabled = processInfo.lowPowerModeEnabled;
+  BOOL thermalPressureIsHigh = processInfo.thermalState >= NSProcessInfoThermalStateSerious;
+
+#if DEBUG && TARGET_OS_SIMULATOR
+  if ([[processInfo.environment objectForKey:@"DOL_FORCE_PERFORMANCE_WARNING"] boolValue]) {
+    lowPowerModeEnabled = true;
+  }
+#endif
+
+  if (!lowPowerModeEnabled && !thermalPressureIsHigh) {
+    [self startEmulation];
+    return;
+  }
+
+  NSMutableArray<NSString*>* reasons = [[NSMutableArray alloc] init];
+  if (lowPowerModeEnabled) {
+    [reasons addObject:@"Low Power Mode is enabled. Turn it off in Settings for higher and more stable performance."];
+  }
+  if (thermalPressureIsHigh) {
+    [reasons addObject:@"This device is already under serious thermal pressure. Let it cool before starting for smoother frame pacing."];
+  }
+
+  UIAlertController* alert = [UIAlertController
+      alertControllerWithTitle:@"Performance Warning"
+                       message:[reasons componentsJoinedByString:@"\n\n"]
+                preferredStyle:UIAlertControllerStyleAlert];
+  [alert addAction:[UIAlertAction actionWithTitle:@"Back to Library"
+                                           style:UIAlertActionStyleCancel
+                                         handler:^(UIAlertAction* action) {
+    [self.navigationController dismissViewControllerAnimated:true completion:nil];
+  }]];
+  [alert addAction:[UIAlertAction actionWithTitle:@"Continue Anyway"
+                                           style:UIAlertActionStyleDefault
+                                         handler:^(UIAlertAction* action) {
+    [self startEmulation];
+  }]];
+  [self presentViewController:alert animated:true completion:nil];
 }
 
 - (void)startEmulation {
@@ -225,40 +266,7 @@
 }
 
 - (void)receiveTitleChangedNotification {
-  if (Config::Get(Config::MAIN_ANALYTICS_ENABLED)) {
-    NSMutableArray<NSString*>* controllerList = [[NSMutableArray alloc] init];
-    
-    for (GCController* controller in [GCController controllers]) {
-      NSString* controllerType = @"Unknown";
-      
-      if (controller.extendedGamepad != nil) {
-        controllerType = @"Extended";
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
-      } else if (controller.gamepad != nil) {
-#pragma clang diagnostic pop
-        controllerType = @"Normal";
-      } else if (controller.microGamepad != nil) {
-        controllerType = @"Micro";
-      } else {
-        controllerType = @"Unknown";
-      }
-      
-      [controllerList addObject:[NSString stringWithFormat:@"%@ (%@)", [controller vendorName], controllerType]];
-    }
-    
-    NSString* title = CppToFoundationString(SConfig::GetInstance().GetTitleDescription());
-    
-    if ([title isEqualToString:@""]) {
-      title = @"Unknown";
-    }
-    
-    [FIRAnalytics logEventWithName:@"game_start" parameters:@{
-      @"game_uid" : title,
-      @"is_returning" : @"false", // TODO
-      @"connected_controllers" : [controllerList count] != 0 ? [controllerList componentsJoinedByString:@", "] : @"none"
-    }];
-  }
+  // Reserved for title-dependent UI updates. Personal builds collect no telemetry.
 }
 
 - (void)receiveEmulationEndNotification {

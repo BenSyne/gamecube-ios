@@ -9,8 +9,30 @@ Source/Core/Common/scmrev.h
 /cmake-build-debug
 /cmake-build-release
 /[Bb]uild*/
+/.build/
+/Artifacts/
 /[Bb]inary*/
 /obj/
+# Never commit local signing material, packages, or user game/save data
+*.ipa
+*.mobileprovision
+*.p8
+*.p12
+*.cer
+*.xcuserstate
+xcuserdata/
+.env
+.env.*
+*.iso
+*.gcm
+*.rvz
+*.wbfs
+*.wia
+*.gcz
+*.nkit.iso
+*.nkit.gcz
+*.raw
+*.sav
 # Ignore files output by Android cmake build
 /Source/Android/app/.cxx/
 /libs/

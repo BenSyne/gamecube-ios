@@ -7,7 +7,7 @@
 
 @import AltKit;
 
-@interface JitManager (AltServer)
+@interface JitManager (AltServerPrivate)
 
 @property (nonatomic) bool isAltServerAutoConnecting;
 

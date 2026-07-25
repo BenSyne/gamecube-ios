@@ -1008,7 +1008,8 @@ ShaderCode GenPixelShader(APIType api_type, const ShaderHostConfig& host_config,
 
   out.Write("  // Alpha Test\n");
 
-  if (early_depth && DriverDetails::HasBug(DriverDetails::BUG_BROKEN_DISCARD_WITH_EARLY_Z))
+  if (use_framebuffer_fetch && early_depth &&
+      DriverDetails::HasBug(DriverDetails::BUG_BROKEN_DISCARD_WITH_EARLY_Z))
   {
     // Instead of using discard, fetch the framebuffer's color value and use it as the output
     // for this fragment.

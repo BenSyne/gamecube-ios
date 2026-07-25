@@ -77,6 +77,7 @@ static std::string s_android_lib_directory;
 #ifdef __APPLE__
 static Common::DynamicLibrary s_security_framework;
 
+#ifndef IPHONEOS
 using DolSecTranslocateIsTranslocatedURL = Boolean (*)(CFURLRef path, bool* isTranslocated,
                                                        CFErrorRef* __nullable error);
 using DolSecTranslocateCreateOriginalPathForURL = CFURLRef
@@ -84,6 +85,7 @@ __nullable (*)(CFURLRef translocatedPath, CFErrorRef* __nullable error);
 
 static DolSecTranslocateIsTranslocatedURL s_is_translocated_url;
 static DolSecTranslocateCreateOriginalPathForURL s_create_orig_path;
+#endif
 #endif
 
 FileInfo::FileInfo(const std::string& path) : FileInfo(path.c_str())

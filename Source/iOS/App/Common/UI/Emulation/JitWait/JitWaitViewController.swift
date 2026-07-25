@@ -11,7 +11,9 @@ class JitWaitViewController: UIViewController {
   
   override func viewDidLoad() {
     super.viewDidLoad()
-    
+
+    self.view.accessibilityViewIsModal = true
+    self.checkJit()
     self.timer = Timer.scheduledTimer(timeInterval: 1, target: self, selector: #selector(checkJit), userInfo: nil, repeats: true)
     
     JitManager.shared().acquireJitByAltServer()
@@ -19,7 +21,13 @@ class JitWaitViewController: UIViewController {
   }
   
   override func viewWillAppear(_ animated: Bool) {
+    super.viewWillAppear(animated)
     self.showAcquisitionErrorIfNecessary()
+  }
+
+  override func viewWillDisappear(_ animated: Bool) {
+    super.viewWillDisappear(animated)
+    self.timer?.invalidate()
   }
   
   @objc func checkJit() {
@@ -58,8 +66,8 @@ class JitWaitViewController: UIViewController {
   }
   
   @IBAction func helpPressed(_ sender: Any) {
-    let url = URL.init(string: "https://dolphinios.oatmealdome.me/jit-help")
-    UIApplication.shared.open(url!, options: [:], completionHandler: nil)
+    guard let url = URL(string: "https://dolphinios.oatmealdome.me/jit-help") else { return }
+    UIApplication.shared.open(url, options: [:], completionHandler: nil)
   }
   
   @IBAction func noJitPressed(_ sender: Any) {

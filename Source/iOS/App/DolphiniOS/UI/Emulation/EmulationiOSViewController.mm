@@ -73,6 +73,11 @@ typedef NS_ENUM(NSInteger, DOLEmulationVisibleTouchPad) {
   }
 
   _stateSlot = Config::GetBase(Config::MAIN_SELECTED_STATE_SLOT);
+
+  self.pullDownButton.accessibilityLabel = @"Show Emulation Menu";
+  self.pullDownButton.accessibilityHint =
+      @"Shows pause, stop, controller, and save-state controls.";
+  self.pullDownButton.accessibilityIdentifier = @"Emulation.ShowMenu";
   
   // On iPadOS 26, the pull down button in the upper left can be blocked by window controls.
   if (UIDevice.currentDevice.userInterfaceIdiom == UIUserInterfaceIdiomPad) {
@@ -166,7 +171,8 @@ typedef NS_ENUM(NSInteger, DOLEmulationVisibleTouchPad) {
 
     UIMenu* menu = [UIMenu menuWithTitle:@"Touch IR Pointer" image:[UIImage systemImageNamed:@"hand.point.up.left"] identifier:nil options:0 children:@[
       [UIAction actionWithTitle:@"Disabled" image:nil identifier:nil handler:^(UIAction*) {
-        Config::SetBaseOrCurrent(Config::MAIN_TOUCH_PAD_IR_MODE, TCWiiTouchIRModeNone);
+        Config::SetBaseOrCurrent(Config::MAIN_TOUCH_PAD_IR_MODE,
+                                 static_cast<int>(TCWiiTouchIRModeNone));
 
         [self updatePointerValuesOnWiiTouchPads];
         [self recreateMenu];
@@ -174,7 +180,8 @@ typedef NS_ENUM(NSInteger, DOLEmulationVisibleTouchPad) {
         [self.navigationController setNavigationBarHidden:true animated:true];
       }],
       [UIAction actionWithTitle:@"Follow" image:nil identifier:nil handler:^(UIAction*) {
-        Config::SetBaseOrCurrent(Config::MAIN_TOUCH_PAD_IR_MODE, TCWiiTouchIRModeFollow);
+        Config::SetBaseOrCurrent(Config::MAIN_TOUCH_PAD_IR_MODE,
+                                 static_cast<int>(TCWiiTouchIRModeFollow));
 
         [self updatePointerValuesOnWiiTouchPads];
         [self recreateMenu];
@@ -182,7 +189,8 @@ typedef NS_ENUM(NSInteger, DOLEmulationVisibleTouchPad) {
         [self.navigationController setNavigationBarHidden:true animated:true];
       }],
       [UIAction actionWithTitle:@"Drag" image:nil identifier:nil handler:^(UIAction*) {
-        Config::SetBaseOrCurrent(Config::MAIN_TOUCH_PAD_IR_MODE, TCWiiTouchIRModeDrag);
+        Config::SetBaseOrCurrent(Config::MAIN_TOUCH_PAD_IR_MODE,
+                                 static_cast<int>(TCWiiTouchIRModeDrag));
 
         [self updatePointerValuesOnWiiTouchPads];
         [self recreateMenu];
@@ -481,7 +489,6 @@ typedef NS_ENUM(NSInteger, DOLEmulationVisibleTouchPad) {
         return;
     }
     auto& system = Core::System::GetInstance();
-    std::pair<u16, u16> id_var = system.GetSkylanderPortal().CalculateIDs(file_data);
     u8 portal_slot = system.GetSkylanderPortal().LoadSkylander(std::make_unique<IOS::HLE::USB::SkylanderFigure>(std::move(sky_file)));
     if (portal_slot == 0xFF)
     {

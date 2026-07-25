@@ -9,6 +9,8 @@
 #import "LocalizationUtil.h"
 #import "MainSceneCoordinator.h"
 
+NSNotificationName const DOLImportFileFinishedNotification = @"DOLImportFileFinishedNotification";
+
 @implementation ImportFileManager {
   UIWindow* _window;
 }

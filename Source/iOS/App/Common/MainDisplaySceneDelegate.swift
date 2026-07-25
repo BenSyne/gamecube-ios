@@ -5,9 +5,23 @@ import UIKit
 
 class MainDisplaySceneDelegate: UIResponder, UIWindowSceneDelegate {
   var window: UIWindow?
+
+  private func importFirstURL(from contexts: Set<UIOpenURLContext>) {
+    guard let url = contexts.first?.url else { return }
+
+    // Defer presentation until the scene's root controller is attached.
+    DispatchQueue.main.async {
+      ImportFileManager.shared().importFile(at: url)
+    }
+  }
   
   func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
     MainSceneCoordinator.shared().mainScene = scene as? UIWindowScene
+    importFirstURL(from: connectionOptions.urlContexts)
+  }
+
+  func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
+    importFirstURL(from: URLContexts)
   }
   
   func sceneDidDisconnect(_ scene: UIScene) {

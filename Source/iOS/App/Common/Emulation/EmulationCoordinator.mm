@@ -24,6 +24,9 @@
 #import "HostQueue.h"
 #import "JitManager.h"
 
+NSNotificationName const DOLEmulationDidStartNotification = @"DOLEmulationDidStartNotification";
+NSNotificationName const DOLEmulationDidEndNotification = @"DOLEmulationDidEndNotification";
+
 @implementation EmulationCoordinator {
   MTKView* _mtkView;
   CAMetalLayer* _metalLayer;

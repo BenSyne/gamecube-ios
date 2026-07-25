@@ -41,7 +41,16 @@ void Metal::Util::PopulateBackendInfo(BackendInfo* backend_info)
   backend_info->api_type = APIType::Metal;
   backend_info->bUsesLowerLeftOrigin = false;
   backend_info->bSupportsExclusiveFullscreen = false;
+  // The iOS Simulator reports Apple GPU families even though its Metal
+  // compiler rejects dual-source blending and render-target reads. Advertising
+  // either feature produces pipelines that compile on devices but fail in the
+  // simulator. Keep the real-device capabilities unchanged and use Dolphin's
+  // blend approximations for simulator validation.
+#if TARGET_OS_SIMULATOR
+  backend_info->bSupportsDualSourceBlend = false;
+#else
   backend_info->bSupportsDualSourceBlend = true;
+#endif
   backend_info->bSupportsPrimitiveRestart = true;
   backend_info->bSupportsGeometryShaders = false;
   backend_info->bSupportsComputeShaders = true;
@@ -317,7 +326,11 @@ void Metal::Util::PopulateBackendInfoFeatures(const VideoConfig& config, Backend
     }
   }
 
+#if TARGET_OS_SIMULATOR
+  backend_info->bSupportsFramebufferFetch = false;
+#else
   backend_info->bSupportsFramebufferFetch = [device supportsFamily:MTLGPUFamilyApple1];
+#endif
 #if TARGET_OS_OSX
   if (vendor == DriverDetails::VENDOR_INTEL)
     backend_info->bSupportsFramebufferFetch |= DetectIntelGPUFBFetch(device);

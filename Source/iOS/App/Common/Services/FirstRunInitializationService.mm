@@ -10,6 +10,9 @@
 #import "Core/HW/GCPad.h"
 #import "Core/HW/Wiimote.h"
 
+#import "Core/Config/GraphicsSettings.h"
+#import "VideoCommon/VideoConfig.h"
+
 #import "InputCommon/ControllerEmu/ControllerEmu.h"
 #import "InputCommon/InputConfig.h"
 
@@ -48,8 +51,21 @@
     [self importDefaultProfileForInputConfig:Wiimote::GetConfig()];
     
     Config::SetBase(Config::MAIN_GFX_BACKEND, "Metal");
+    Config::SetBase(Config::GFX_SHADER_CACHE, true);
+    Config::SetBase(Config::GFX_WAIT_FOR_SHADERS_BEFORE_STARTING, false);
+    Config::SetBase(Config::GFX_SHADER_COMPILATION_MODE,
+                    ShaderCompilationMode::AsynchronousSkipRendering);
     
-    [[BootNoticeManager shared] enqueueViewController:[[UnofficialBuildNoticeViewController alloc] initWithNibName:@"UnofficialBuildNotice" bundle:nil]];
+    BOOL shouldPresentUnofficialNotice = true;
+#if DEBUG && TARGET_OS_SIMULATOR
+    // Keep first-run initialization in simulator smoke tests while allowing
+    // the harness to proceed without tapping through a one-time notice.
+    shouldPresentUnofficialNotice =
+        ![[NSProcessInfo.processInfo.environment objectForKey:@"DOL_SUPPRESS_BOOT_NOTICE"] boolValue];
+#endif
+    if (shouldPresentUnofficialNotice) {
+      [[BootNoticeManager shared] enqueueViewController:[[UnofficialBuildNoticeViewController alloc] initWithNibName:@"UnofficialBuildNotice" bundle:nil]];
+    }
   }
   
   return true;

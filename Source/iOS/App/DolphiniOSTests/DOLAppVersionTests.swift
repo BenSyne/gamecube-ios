@@ -95,4 +95,3 @@ class DOLAppVersionTests: XCTestCase {
     XCTAssertFalse(DOLAppVersion(jsonVersion: "11.22.33 (55)") > DOLAppVersion(jsonVersion: "11.22.33 (55)"))
   }
 }
-

@@ -1,8 +1,126 @@
-# DolphiniOS
+# GameCube on iPhone and iPad
 
-DolphiniOS is a port of the Dolphin Emulator to iOS and iPadOS. For installation instructions and downloads, check [our website](https://dolphinios.oatmealdome.me).
+A tested, sideloadable DolphiniOS performance build for modern iPhones and
+iPads. It adapts the open-source Dolphin/DolphiniOS codebase with a cleaner
+mobile library, reliable Files import, current-device build fixes, landscape
+support, JIT guidance, privacy-first defaults, and repeatable automated tests.
 
-This is the repository for the new DolphiniOS codebase.
+> This repository does not contain games, encryption keys, Nintendo system
+> software, or copyrighted cover art. Use only software you own or are legally
+> permitted to use.
+
+## Let an agent build it
+
+This repository includes matching instructions for Codex (`AGENTS.md`) and
+Claude Code (`CLAUDE.md`). Open the cloned repository in either agent and say:
+
+```text
+Build GameCube for my connected iPhone or iPad.
+```
+
+The agent will inspect the Mac, initialize dependencies, validate the app in a
+simulator, build the correct package, and guide the unavoidable signing, device
+unlock, and JIT steps. It must never download a commercial game.
+
+For a simulator-only proof:
+
+```text
+Build GameCube and run the full simulator smoke test.
+```
+
+## Manual quick start
+
+Requirements:
+
+- A Mac with Xcode. Xcode 26.5 is the validated configuration.
+- Homebrew.
+- An iPhone or iPad for real GameCube performance.
+- Your own Apple signing identity, or a trusted sideloading tool.
+
+Clone with submodules and validate the toolchain:
+
+```sh
+git clone --recursive https://github.com/BenSyne/gamecube-ios.git
+cd gamecube-ios
+Tools/iOS/bootstrap.sh --mode check --install
+```
+
+Run the complete open-source homebrew simulator test:
+
+```sh
+Tools/iOS/bootstrap.sh --mode simulator --install
+```
+
+Build an IPA for a sideloading tool to re-sign:
+
+```sh
+Tools/iOS/bootstrap.sh --mode unsigned
+```
+
+Or build with your Apple Developer team:
+
+```sh
+TEAM_ID=ABCDEFGHIJ ORG_ID=com.yourname \
+  Tools/iOS/bootstrap.sh --mode signed
+```
+
+Outputs are written beneath `Artifacts/`, which is intentionally excluded from
+Git.
+
+Before publishing any change:
+
+```sh
+Tools/iOS/audit_public_release.sh
+```
+
+## What this build adds
+
+- Adaptive iPhone/iPad game library, empty-state onboarding, pull-to-refresh,
+  accessible labels, and direct Files import.
+- Portrait plus both landscape orientations, including live rotation while a
+  game is running.
+- Metal capability fixes for current Xcode simulators without weakening the
+  real-device Metal path.
+- First-run performance defaults for shader compilation and caching.
+- A clear JIT waiting screen designed around current StikDebug workflows.
+- Low Power Mode and thermal-pressure warnings before expensive emulation.
+- Firebase Analytics and Crashlytics removed from the personal build.
+- Signed and unsigned packaging scripts plus an end-to-end import, render,
+  pause, save-state, stop, JIT-gate, and thermal-warning smoke test.
+
+Read the full [iPhone and iPad guide](docs/iOS_CONSUMPTION.md), the
+[validation record](docs/iOS_VALIDATION.md), and the
+[release test matrix](docs/iOS_TEST_MATRIX.md).
+
+## Install, JIT, and games
+
+Full-speed emulation requires JIT. On a non-jailbroken device, install the app,
+open a game, leave the JIT waiting screen visible, and enable JIT for
+DolphiniOS using StikDebug 2.3.0 or newer. The game starts automatically after
+attachment is detected. See the
+[official DolphiniOS JIT guide](https://dolphinios.oatmealdome.me/jit-help).
+
+Import your own legal `RVZ`, `ISO`, `GCM`, `GCZ`, `WIA`, `DOL`, or `ELF` file
+using the `+` button or place it in
+`On My iPhone/iPad → DolphiniOS → Software`.
+
+Performance varies by device and game. Start with Metal, 1× internal
+resolution, Low Power Mode off, and a cool device.
+
+## Project lineage and license
+
+This is a community performance build of
+[OatmealDome’s DolphiniOS](https://github.com/OatmealDome/dolphin-ios), itself
+based on the [Dolphin Emulator](https://github.com/dolphin-emu/dolphin).
+Dolphin/DolphiniOS is licensed under GPL-2.0-or-later. Preserve the source,
+copyright notices, license files, and corresponding-source obligations when
+redistributing a build.
+
+This project is not affiliated with or endorsed by Nintendo, the Dolphin
+project, or the DolphiniOS project. “GameCube” is used only to describe
+compatibility.
+
+## Upstream build notes
 
 ## Building
 

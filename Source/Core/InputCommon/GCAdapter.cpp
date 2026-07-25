@@ -1006,6 +1006,8 @@ bool IsDetected(const char** error_message)
 #elif GCADAPTER_USE_ANDROID_IMPLEMENTATION
   return s_detected;
 #endif
+
+  return false;
 }
 
 }  // namespace GCAdapter

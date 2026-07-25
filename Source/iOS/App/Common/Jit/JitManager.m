@@ -35,7 +35,17 @@ typedef NS_ENUM(NSInteger, DOLJitType) {
 - (id)init {
   if (self = [super init]) {
 #if TARGET_OS_SIMULATOR
+#if DEBUG
+    // Simulator builds normally have unrestricted JIT. This opt-in hook lets
+    // the smoke harness exercise the physical-device JIT gate and its copy.
+    if ([[NSProcessInfo.processInfo.environment objectForKey:@"DOL_FORCE_JIT_WAIT"] boolValue]) {
+      _jitType = DOLJitTypeDebugger;
+    } else {
+      _jitType = DOLJitTypeUnrestricted;
+    }
+#else
     _jitType = DOLJitTypeUnrestricted;
+#endif
 #else
     _jitType = DOLJitTypeDebugger;
 #endif

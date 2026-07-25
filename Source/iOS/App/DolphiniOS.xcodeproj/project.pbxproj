@@ -110,12 +110,9 @@
 		B97C49B2297E717D00E30877 /* AboutViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B97C49B1297E717C00E30877 /* AboutViewController.m */; };
 		B97C49B4297E7DB600E30877 /* AnalyticsNoticeViewControllerDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B97C49B3297E7DB600E30877 /* AnalyticsNoticeViewControllerDelegate.swift */; };
 		B97C49B6297F8B0D00E30877 /* UniformTypeIdentifiers.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B97C49B5297F8B0D00E30877 /* UniformTypeIdentifiers.framework */; };
-		B97E4B492964CBA100B3EE9C /* FirebaseAnalyticsWithoutAdIdSupport in Frameworks */ = {isa = PBXBuildFile; productRef = B97E4B482964CBA100B3EE9C /* FirebaseAnalyticsWithoutAdIdSupport */; };
-		B97E4B4B2964CBA100B3EE9C /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = B97E4B4A2964CBA100B3EE9C /* FirebaseCrashlytics */; };
 		B97E4B532965011C00B3EE9C /* FirebaseService.mm in Sources */ = {isa = PBXBuildFile; fileRef = B97E4B522965011C00B3EE9C /* FirebaseService.mm */; };
 		B97E4B5629656EC300B3EE9C /* VersionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B97E4B5529656EC300B3EE9C /* VersionManager.swift */; };
 		B97E4B58296573E200B3EE9C /* DOLBuildSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = B97E4B57296573E200B3EE9C /* DOLBuildSource.swift */; };
-		B97E4B5A29657BCB00B3EE9C /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = B97E4B5929657BCB00B3EE9C /* GoogleService-Info.plist */; };
 		B97E4B5D2965F9BE00B3EE9C /* AnalyticsNotice.xib in Resources */ = {isa = PBXBuildFile; fileRef = B97E4B5C2965F9BE00B3EE9C /* AnalyticsNotice.xib */; };
 		B97E4B612965FA1B00B3EE9C /* AnalyticsNoticeViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = B97E4B602965FA1B00B3EE9C /* AnalyticsNoticeViewController.mm */; };
 		B9809C592A4811B000877579 /* SoftwareProperties.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B9809C582A4811B000877579 /* SoftwareProperties.storyboard */; };
@@ -422,7 +419,6 @@
 		B97E4B522965011C00B3EE9C /* FirebaseService.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = FirebaseService.mm; sourceTree = "<group>"; };
 		B97E4B5529656EC300B3EE9C /* VersionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VersionManager.swift; sourceTree = "<group>"; };
 		B97E4B57296573E200B3EE9C /* DOLBuildSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DOLBuildSource.swift; sourceTree = "<group>"; };
-		B97E4B5929657BCB00B3EE9C /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		B97E4B5C2965F9BE00B3EE9C /* AnalyticsNotice.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = AnalyticsNotice.xib; sourceTree = "<group>"; };
 		B97E4B5F2965FA1B00B3EE9C /* AnalyticsNoticeViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AnalyticsNoticeViewController.h; sourceTree = "<group>"; };
 		B97E4B602965FA1B00B3EE9C /* AnalyticsNoticeViewController.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = AnalyticsNoticeViewController.mm; sourceTree = "<group>"; };
@@ -597,8 +593,6 @@
 				B9D9389E283EF7AD00B290FC /* MetalKit.framework in Frameworks */,
 				B9FCB7E62898FAC10020E233 /* GameController.framework in Frameworks */,
 				B9476B2527F23FFE009C0A4B /* libdolphin.dylib in Frameworks */,
-				B97E4B492964CBA100B3EE9C /* FirebaseAnalyticsWithoutAdIdSupport in Frameworks */,
-				B97E4B4B2964CBA100B3EE9C /* FirebaseCrashlytics in Frameworks */,
 				B900A7B527F2D3C0000361DD /* MoltenVK.xcframework in Frameworks */,
 				B900A7D227F5228B000361DD /* UICollectionViewLeftAlignedLayout in Frameworks */,
 			);
@@ -1057,7 +1051,6 @@
 			children = (
 				B9F41C3B2DC53699006D2434 /* cacert.pem */,
 				B97492482960F64300794509 /* DefaultPreferences.plist */,
-				B97E4B5929657BCB00B3EE9C /* GoogleService-Info.plist */,
 				B96C5DC82CFE4B200046C029 /* Logger.ini */,
 				B950CA932846A13100F45219 /* Sys */,
 			);
@@ -1757,7 +1750,6 @@
 				B99137B428829F1400588446 /* Transfer Core Strings to Storyboard Strings */,
 				B9DC3DF427EFBD2C0084DAA4 /* Resources */,
 				B900A7A027F255E0000361DD /* CopyFiles */,
-				B97E4B622966227B00B3EE9C /* Upload dSYM */,
 			);
 			buildRules = (
 			);
@@ -1767,8 +1759,6 @@
 			packageProductDependencies = (
 				B900A7D127F5228B000361DD /* UICollectionViewLeftAlignedLayout */,
 				B9FCB7DD28988E7E0020E233 /* AltKit */,
-				B97E4B482964CBA100B3EE9C /* FirebaseAnalyticsWithoutAdIdSupport */,
-				B97E4B4A2964CBA100B3EE9C /* FirebaseCrashlytics */,
 			);
 			productName = DolphiniOS;
 			productReference = B9DC3DF627EFBD2C0084DAA4 /* DolphiniOS.app */;
@@ -1807,7 +1797,6 @@
 			packageReferences = (
 				B900A7D027F5228B000361DD /* XCRemoteSwiftPackageReference "UICollectionViewLeftAlignedLayout" */,
 				B9FCB7DC28988E7E0020E233 /* XCRemoteSwiftPackageReference "AltKit" */,
-				B97E4B472964CBA100B3EE9C /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 			);
 			productRefGroup = B9DC3DF727EFBD2C0084DAA4 /* Products */;
 			projectDirPath = "";
@@ -1848,7 +1837,6 @@
 				B9B1483829642C75002C4BE7 /* UpdateRequiredNotice.xib in Resources */,
 				B9EFF8572E7F5E540029F016 /* AppIconBeta_Glass.icon in Resources */,
 				B950CFBD296208D400197719 /* UpdateNotice.xib in Resources */,
-				B97E4B5A29657BCB00B3EE9C /* GoogleService-Info.plist in Resources */,
 				B9EFF8532E7F56790029F016 /* AppIcon_Glass.icon in Resources */,
 				B9447B042841901200BC9110 /* TCGameCubePad.xib in Resources */,
 				B9447B09284192FA00BC9110 /* DolphinAssets.xcassets in Resources */,
@@ -1893,26 +1881,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "\"$PROJECT_DIR/Project/Scripts/BuildCore.sh\"\n";
-		};
-		B97E4B622966227B00B3EE9C /* Upload dSYM */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-				"${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}/Contents/Resources/DWARF/${TARGET_NAME}",
-				"$(SRCROOT)/$(BUILT_PRODUCTS_DIR)/$(INFOPLIST_PATH)",
-			);
-			name = "Upload dSYM";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/bash;
-			shellScript = "if [ \"$DOL_BUILD_SOURCE\" != \"official\" ]; then\n    echo \"Skipping dSYM upload, not official build\"\n    exit\nfi\n\necho \"Proceeding with dSYM upload\"\n\n\"${BUILD_DIR%/Build/*}/SourcePackages/checkouts/firebase-ios-sdk/Crashlytics/run\" --build-phase\n";
 		};
 		B991379B2881DCAC00588446 /* Update Storyboard Strings */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -3592,14 +3560,6 @@
 				minimumVersion = 1.0.0;
 			};
 		};
-		B97E4B472964CBA100B3EE9C /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 9.0.0;
-			};
-		};
 		B9FCB7DC28988E7E0020E233 /* XCRemoteSwiftPackageReference "AltKit" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/rileytestut/AltKit.git";
@@ -3615,16 +3575,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = B900A7D027F5228B000361DD /* XCRemoteSwiftPackageReference "UICollectionViewLeftAlignedLayout" */;
 			productName = UICollectionViewLeftAlignedLayout;
-		};
-		B97E4B482964CBA100B3EE9C /* FirebaseAnalyticsWithoutAdIdSupport */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = B97E4B472964CBA100B3EE9C /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
-			productName = FirebaseAnalyticsWithoutAdIdSupport;
-		};
-		B97E4B4A2964CBA100B3EE9C /* FirebaseCrashlytics */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = B97E4B472964CBA100B3EE9C /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
-			productName = FirebaseCrashlytics;
 		};
 		B9FCB7DD28988E7E0020E233 /* AltKit */ = {
 			isa = XCSwiftPackageProductDependency;

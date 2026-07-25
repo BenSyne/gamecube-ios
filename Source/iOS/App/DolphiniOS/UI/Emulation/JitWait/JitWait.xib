@@ -29,7 +29,7 @@
                                 <constraint firstAttribute="height" constant="100" id="hmP-nM-OsB"/>
                             </constraints>
                         </imageView>
-                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Waiting for JIT" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="MKg-MP-jJG">
+                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="JIT Required for Full Speed" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="MKg-MP-jJG">
                             <rect key="frame" x="0.0" y="100" width="375" height="62"/>
                             <fontDescription key="fontDescription" type="system" weight="heavy" pointSize="34"/>
                             <nil key="textColor"/>
@@ -45,13 +45,11 @@
                             <subviews>
                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="4Lp-si-dj1" userLabel="Warning Text">
                                     <rect key="frame" x="0.5" y="0.0" width="334.5" height="264"/>
-                                    <string key="text">DolphiniOS is waiting for a remote debugger to connect before emulation can start.
+                                    <string key="text">DolphiniOS is ready and waiting for JIT to be enabled.
 
-The Dolphin core uses a technique known as "JIT" to emulate the GameCube and Wii's CPU at fast speeds.
+On a non-jailbroken iPhone or iPad, open StikDebug 2.3.0 or newer and enable JIT for DolphiniOS. Keep this screen open; emulation starts automatically when JIT is detected.
 
-Apple does not allow JIT to be used on iOS by default. However, by attaching a debugger, iOS will allow JIT to be used.
-
-For more information, tap "Help".</string>
+Continuing without JIT uses the interpreter and is only suitable for troubleshooting.</string>
                                     <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                     <nil key="textColor"/>
                                     <nil key="highlightedColor"/>
@@ -92,7 +90,7 @@ For more information, tap "Help".</string>
                                                 <constraint firstAttribute="height" constant="45" id="a9Z-2E-qwn"/>
                                             </constraints>
                                             <fontDescription key="fontDescription" type="boldSystem" pointSize="15"/>
-                                            <state key="normal" title="Help">
+                                            <state key="normal" title="Open JIT Setup Guide">
                                                 <color key="titleColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                             </state>
                                             <userDefinedRuntimeAttributes>
@@ -111,7 +109,7 @@ For more information, tap "Help".</string>
                                                 <constraint firstAttribute="height" constant="45" id="8Ys-JG-Ove"/>
                                             </constraints>
                                             <fontDescription key="fontDescription" type="boldSystem" pointSize="15"/>
-                                            <state key="normal" title="Use No JIT Mode (Slow)">
+                                            <state key="normal" title="Continue Without JIT (Very Slow)">
                                                 <color key="titleColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                             </state>
                                             <userDefinedRuntimeAttributes>
@@ -130,7 +128,7 @@ For more information, tap "Help".</string>
                                                 <constraint firstAttribute="height" constant="45" id="j1f-m3-E7Q"/>
                                             </constraints>
                                             <fontDescription key="fontDescription" type="boldSystem" pointSize="15"/>
-                                            <state key="normal" title="Cancel">
+                                            <state key="normal" title="Back to Library">
                                                 <color key="titleColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                             </state>
                                             <userDefinedRuntimeAttributes>
