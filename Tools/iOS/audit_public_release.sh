@@ -5,6 +5,7 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+PUBLIC_BASE_REV="${PUBLIC_BASE_REV:-7cac54161659421ed95c2cd1c0b0746539a4cd38}"
 cd "$ROOT"
 
 fail() {
@@ -14,7 +15,9 @@ fail() {
 
 list_public_files() {
   {
-    if git rev-parse --verify upstream/master >/dev/null 2>&1; then
+    if git cat-file -e "$PUBLIC_BASE_REV^{commit}" 2>/dev/null; then
+      git diff --name-only --diff-filter=ACMR -z "$PUBLIC_BASE_REV...HEAD"
+    elif git rev-parse --verify upstream/master >/dev/null 2>&1; then
       git diff --name-only --diff-filter=ACMR -z upstream/master...HEAD
     elif git rev-parse --verify HEAD^ >/dev/null 2>&1; then
       git diff --name-only --diff-filter=ACMR -z HEAD^...HEAD
