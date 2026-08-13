@@ -3,8 +3,11 @@
 This branch is a sideloadable iPhone and iPad build of DolphiniOS. It does not contain games, Nintendo system software, encryption keys, or copyrighted cover art. Use only disc images and firmware that you are legally permitted to use.
 
 Codex reads `AGENTS.md` and Claude Code reads `CLAUDE.md`. In either agent, the
-prompt `Build GameCube for my connected iPhone or iPad` invokes the complete
-workflow. The commands below provide the same manual path.
+prompt `Build me a GameCube` starts a read-only readiness check. The agent first
+explains the Mac, Xcode, Apple signing, device, Computer Use, and JIT
+requirements. Reply `Let's go` or `Continue` to authorize dependency setup,
+builds, tests, signing, and installation. The commands below provide the same
+manual path.
 
 ## What is ready
 
@@ -19,10 +22,26 @@ workflow. The commands below provide the same manual path.
 
 ## Requirements
 
-- macOS with Xcode 26.5 or newer and an installed iOS simulator runtime.
+- A local Mac with at least 20 GB free, Xcode (26.5 is validated), and an installed
+  iOS simulator runtime. Open Xcode once and complete first-launch setup.
 - Homebrew packages: `cmake`, `ninja`, and `bartycrouch`.
-- For installation on an iPhone or iPad: an Apple Developer account/team and a unique reverse-DNS organization identifier, or a sideloading tool that re-signs the unsigned IPA.
+- For installation on an iPhone or iPad: an Apple Account signed into Xcode and
+  a unique reverse-DNS organization identifier, or a sideloading tool that
+  re-signs the unsigned IPA. A free Personal Team works for personal testing
+  but normally requires reinstalling after seven days; a paid membership is
+  optional.
 - Supported hardware starts at A9/iOS 14; a device with at least 4 GB RAM is strongly recommended. Newer Apple silicon gives materially better sustained performance.
+
+Inspect readiness without changing the Mac:
+
+```sh
+Tools/iOS/readiness.sh
+```
+
+For graphical Xcode/System Settings steps in Codex Desktop, Computer Use is
+optional but convenient. Enable its plugin, server, and skill, then grant macOS
+Screen Recording and Accessibility. A shell-only agent can still build and
+package everything while the user performs required Apple UI confirmations.
 
 Initialize dependencies after cloning:
 
@@ -70,7 +89,17 @@ The output is `Artifacts/Release/DolphiniOS-unsigned.ipa`. It is not directly in
 
 Install the IPA with SideStore, AltStore Classic, Xcode, or another signing tool you trust. AltStore PAL is not suitable for this build.
 
-Full-speed emulation requires JIT on a non-jailbroken iPhone or iPad. Install StikDebug 2.3.0 or newer, pair it as directed, start a game in DolphiniOS, then enable JIT for DolphiniOS while the JIT waiting screen is open. The game starts automatically when attachment is detected. Current steps live at the [official JIT help page](https://dolphinios.oatmealdome.me/jit-help).
+Full-speed emulation requires JIT on a non-jailbroken iPhone or iPad. Install
+the current [official StikDebug release](https://github.com/StephenDev0/StikDebug/releases),
+create a pairing file with the device unlocked and trusted, connect to Wi-Fi,
+enable LocalDevVPN, start a game in DolphiniOS, and enable JIT for DolphiniOS
+while the waiting screen is open. The game starts automatically when attachment
+is detected. StikDebug is no longer distributed through the App Store. Current
+steps live in the [StikDebug README](https://github.com/StephenDev0/StikDebug/blob/main/README.md)
+and the [official DolphiniOS JIT help page](https://dolphinios.oatmealdome.me/jit-help).
+
+The pairing file is device-specific authorization material. Do not upload it,
+send it to an agent, paste its contents into chat, or commit it.
 
 “Continue Without JIT” is a troubleshooting path, not a playable-performance mode. On iOS 26 devices that use TXM, use StikDebug specifically; a generic debugger attachment can still crash when the core starts.
 

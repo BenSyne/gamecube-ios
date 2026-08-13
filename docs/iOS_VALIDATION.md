@@ -4,6 +4,26 @@ Validated July 13–25, 2026 against upstream base `7cac54161659` with Xcode
 26.5. This record distinguishes automated simulator coverage from observed
 physical-device behavior; it is not a universal game compatibility claim.
 
+## Public-release refresh — August 13, 2026
+
+The agent-native public-release changes were revalidated from the same upstream
+base with Xcode 26.5:
+
+- Read-only environment readiness and the Codex/Claude two-phase agent contract
+  passed.
+- A clean simulator rebuild passed, followed by the complete pinned-homebrew
+  smoke flow: import, launch, Metal output, touch UI, pause, save/load, stop,
+  JIT gate, and performance preflight.
+- `DOLAppVersionTests`: 22 passed, 0 failed.
+- A fresh arm64 unsigned device IPA was produced for user-controlled re-signing:
+  19,613,127 bytes, SHA-256
+  `78b84b7d931699b213de0b0b9e6400f7a06953158d7da49e7e6d435583594f4b`.
+- Shell syntax, whitespace, agent-contract, and full public-source-boundary
+  audits passed after removing inherited hard-coded signing-team values.
+
+No physical device was connected for this refresh. The physical-device results
+below remain the July 2026 baseline and were not re-run on August 13.
+
 ## Automated gates passed
 
 - Signed Debug builds on iPad Pro 13-inch (M5) and iPhone 17 Pro iOS 26.5

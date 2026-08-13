@@ -1,32 +1,110 @@
-# GameCube on iPhone and iPad
+# Build Me a GameCube — iPhone and iPad
 
-A tested, sideloadable DolphiniOS performance build for modern iPhones and
-iPads. It adapts the open-source Dolphin/DolphiniOS codebase with a cleaner
-mobile library, reliable Files import, current-device build fixes, landscape
-support, JIT guidance, privacy-first defaults, and repeatable automated tests.
+[![License: GPL-2.0+](https://img.shields.io/badge/license-GPL--2.0%2B-5e6ad2.svg)](COPYING)
+[![Platform](https://img.shields.io/badge/platform-iPhone%20%7C%20iPad-111111.svg)](docs/iOS_CONSUMPTION.md)
+[![Xcode](https://img.shields.io/badge/validated-Xcode%2026.5-147efb.svg)](docs/iOS_VALIDATION.md)
+
+Clone the repo, open it in Codex or Claude Code, and say:
+
+```text
+Build me a GameCube.
+```
+
+The agent checks your Mac, gives you one honest preparation list, waits for
+`Let's go`, and then builds, tests, signs, installs, and launches a performant
+GameCube/Wii emulator on your own iPhone or iPad.
+
+Under the hood, this is a tested community performance build of the open-source
+Dolphin/DolphiniOS codebase. It adds a cleaner mobile library, reliable Files
+import, current-device build fixes, landscape support, JIT guidance,
+privacy-first defaults, and repeatable end-to-end tests.
 
 > This repository does not contain games, encryption keys, Nintendo system
 > software, or copyrighted cover art. Use only software you own or are legally
 > permitted to use.
 
-## Let an agent build it
+## The one-prompt path
 
-This repository includes matching instructions for Codex (`AGENTS.md`) and
-Claude Code (`CLAUDE.md`). Open the cloned repository in either agent and say:
+### 1. Clone it on a Mac
 
-```text
-Build GameCube for my connected iPhone or iPad.
+```sh
+git clone --recursive https://github.com/BenSyne/gamecube-ios.git
+cd gamecube-ios
 ```
 
-The agent will inspect the Mac, initialize dependencies, validate the app in a
-simulator, build the correct package, and guide the unavoidable signing, device
-unlock, and JIT steps. It must never download a commercial game.
+### 2. Open this folder in your local agent
 
-For a simulator-only proof:
+Codex automatically reads [`AGENTS.md`](AGENTS.md). Claude Code reads
+[`CLAUDE.md`](CLAUDE.md). The two files contain the same guarded build
+playbook.
+
+### 3. Ask for the build
+
+```text
+Build me a GameCube.
+```
+
+The first response is deliberately a readiness check, not a surprise hour-long
+build. It detects what is already ready and explains anything you still need:
+
+- a local Mac with roughly 20 GB free and Xcode (26.5 is validated);
+- an Apple Account signed into Xcode;
+- an unlocked, trusted iPhone/iPad with Developer Mode enabled;
+- optional Codex Computer Use access for Xcode/System Settings clicks;
+- the later StikDebug + LocalDevVPN setup required for full-speed JIT.
+
+When the checklist is green, reply:
+
+```text
+Let's go.
+```
+
+The agent then owns the build loop: dependencies, submodules, simulator proof,
+privacy audit, signing, installation, launch, and device validation. It pauses
+only when Apple requires you to sign in, approve trust, enter a passcode, enable
+Developer Mode, or tap the on-device JIT control.
+
+For a simulator-only proof, ask:
 
 ```text
 Build GameCube and run the full simulator smoke test.
 ```
+
+## What to prepare
+
+| Item | What you need |
+| --- | --- |
+| Mac | Local macOS machine; USB/device installation cannot run from a cloud agent |
+| Xcode | Xcode 26.5 is validated; open it once and finish first-launch setup |
+| Disk | 20 GB free is recommended for source, submodules, dependencies, and derived data |
+| Apple signing | A free Apple Account Personal Team works for personal testing; Apple normally expires its profiles after 7 days. A paid membership is optional |
+| iPhone/iPad | Plugged in, unlocked, trusted, and in Developer Mode |
+| Network | Internet for submodules and pinned build/test dependencies; Wi-Fi for the current on-device JIT flow |
+| Games | None for testing. Later, use only homebrew or a dump you legally own |
+
+Apple documents free Personal Team device testing and its seven-day limits in
+[Developer Account Help](https://developer.apple.com/help/account/basics/about-your-developer-account).
+
+### Codex Desktop setup
+
+The shell build only needs a local checkout with shell and workspace write
+access. For the smoothest graphical handoff:
+
+1. Open `Plugins > Computer Use` in Codex.
+2. Install or enable the plugin, then turn on its server and skill.
+3. Grant Screen Recording and Accessibility when macOS prompts.
+4. Allow Xcode or System Settings only when the task actually needs them.
+
+Computer Use is optional. Without it, Codex still performs the build and gives
+you the exact Xcode/device clicks. Chrome control is not required. See the
+[official Computer Use setup](https://learn.chatgpt.com/docs/computer-use).
+
+### Claude Code setup
+
+Open Claude Code locally in the cloned directory with normal shell and file
+access. No Codex plugin is required. If Claude cannot operate graphical apps,
+you perform the small Xcode, trust, Developer Mode, and StikDebug interactions
+while it performs the reproducible shell workflow.
 
 ## Manual quick start
 
@@ -37,11 +115,15 @@ Requirements:
 - An iPhone or iPad for real GameCube performance.
 - Your own Apple signing identity, or a trusted sideloading tool.
 
-Clone with submodules and validate the toolchain:
+See exactly what is ready without changing the Mac:
 
 ```sh
-git clone --recursive https://github.com/BenSyne/gamecube-ios.git
-cd gamecube-ios
+Tools/iOS/readiness.sh
+```
+
+Validate the toolchain and initialize dependencies:
+
+```sh
 Tools/iOS/bootstrap.sh --mode check --install
 ```
 
@@ -90,15 +172,23 @@ Tools/iOS/audit_public_release.sh
 
 Read the full [iPhone and iPad guide](docs/iOS_CONSUMPTION.md), the
 [validation record](docs/iOS_VALIDATION.md), and the
-[release test matrix](docs/iOS_TEST_MATRIX.md).
+[release test matrix](docs/iOS_TEST_MATRIX.md). Changes are welcome; start with
+the [iOS contribution guide](docs/iOS_CONTRIBUTING.md).
 
 ## Install, JIT, and games
 
 Full-speed emulation requires JIT. On a non-jailbroken device, install the app,
 open a game, leave the JIT waiting screen visible, and enable JIT for
-DolphiniOS using StikDebug 2.3.0 or newer. The game starts automatically after
-attachment is detected. See the
+DolphiniOS using the current
+[official StikDebug release](https://github.com/StephenDev0/StikDebug/releases),
+a device pairing file, Wi-Fi, and LocalDevVPN. The game starts automatically
+after attachment is detected. StikDebug is no longer distributed through the
+App Store; follow its current README and the
 [official DolphiniOS JIT guide](https://dolphinios.oatmealdome.me/jit-help).
+
+Treat the pairing file like a credential: do not post it, commit it, or send it
+to an agent. “Continue Without JIT” exists for diagnosis and is far too slow
+for normal play.
 
 Import your own legal `RVZ`, `ISO`, `GCM`, `GCZ`, `WIA`, `DOL`, or `ELF` file
 using the `+` button or place it in

@@ -13,6 +13,7 @@ usage() {
   cat <<'USAGE'
 Usage: Tools/iOS/bootstrap.sh [options]
 
+  Readiness:          Tools/iOS/readiness.sh
   --mode check       Validate the Mac and initialize submodules (default)
   --mode simulator   Run the complete simulator build and smoke test
   --mode unsigned    Build an unsigned IPA for a sideloading tool to re-sign

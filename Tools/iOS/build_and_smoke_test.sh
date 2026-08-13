@@ -183,7 +183,13 @@ library_is_visible() {
 log "Importing through the registered Files/document URL flow"
 DESCRIPTION="$("$IDB" ui describe-all --udid "$UDID")"
 if [[ "${SMOKE_PRESERVE_DATA:-0}" != "1" ]]; then
-  grep -Fq '"AXLabel":"Import a Game"' <<<"$DESCRIPTION" || fail "Clean install did not show Library onboarding"
+  for _ in {1..15}; do
+    accessibility_center_for_value "$DESCRIPTION" AXLabel "Import a Game" AXButton >/dev/null && break
+    sleep 1
+    DESCRIPTION="$("$IDB" ui describe-all --udid "$UDID")"
+  done
+  accessibility_center_for_value "$DESCRIPTION" AXLabel "Import a Game" AXButton >/dev/null ||
+    fail "Clean install did not show Library onboarding"
 fi
 xcrun simctl openurl "$UDID" "file://$INCOMING_FILE"
 sleep 2

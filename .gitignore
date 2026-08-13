@@ -16,9 +16,12 @@ Source/Core/Common/scmrev.h
 # Never commit local signing material, packages, or user game/save data
 *.ipa
 *.mobileprovision
+*.mobiledevicepairing
 *.p8
 *.p12
 *.cer
+[Pp]airing[Ff]ile*.plist
+/PairingFiles/
 *.xcuserstate
 xcuserdata/
 .env
