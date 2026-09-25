@@ -66,7 +66,7 @@ class JitWaitViewController: UIViewController {
   }
   
   @IBAction func helpPressed(_ sender: Any) {
-    guard let url = URL(string: "https://dolphinios.oatmealdome.me/jit-help") else { return }
+    guard let url = URL(string: "https://github.com/StikDebug/StikDebug/blob/main/README.md") else { return }
     UIApplication.shared.open(url, options: [:], completionHandler: nil)
   }
   

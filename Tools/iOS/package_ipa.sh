@@ -22,7 +22,8 @@ fi
 
 mkdir -p "$(dirname "$OUTPUT")" "$ROOT/.build/SourcePackages"
 
-xcodebuild \
+printf 'Building Apple-signed device app\n'
+xcodebuild -quiet \
   -project "$ROOT/Source/iOS/App/DolphiniOS.xcodeproj" \
   -scheme 'DiOS (NJB)' \
   -configuration 'Release (Non-Jailbroken)' \
@@ -33,7 +34,7 @@ xcodebuild \
   DEVELOPMENT_TEAM="$TEAM_ID" \
   DOL_PBID_ORGANIZATION_IDENTIFIER="$ORG_ID" \
   CODE_SIGN_STYLE=Automatic \
-  build
+  build 2>&1 | sed "s/${TEAM_ID}/[redacted team]/g"
 
 [[ -d "$APP" ]] || fail "built app not found at $APP"
 
@@ -55,6 +56,10 @@ for orientation in \
 done
 
 codesign --verify --deep --strict "$APP"
+JIT_ENTITLEMENT="$(codesign -d --entitlements :- "$APP" 2>/dev/null |
+  plutil -extract get-task-allow raw -o - - 2>/dev/null || true)"
+[[ "$JIT_ENTITLEMENT" == true ]] ||
+  fail "signed app lacks get-task-allow; use an Apple development signing profile for StikDebug JIT"
 
 STAGE="$(mktemp -d)"
 trap 'rm -rf "$STAGE"' EXIT
@@ -62,7 +67,8 @@ mkdir -p "$STAGE/Payload"
 ditto "$APP" "$STAGE/Payload/DolphiniOS.app"
 if find "$STAGE/Payload/DolphiniOS.app" -type f \( \
   -iname '*.iso' -o -iname '*.gcm' -o -iname '*.rvz' -o -iname '*.wbfs' -o \
-  -iname '*.wia' -o -iname '*.gcz' \) -print -quit | grep -q .; then
+  -iname '*.wia' -o -iname '*.gcz' -o -iname '*.ciso' -o -iname '*.wad' -o \
+  -iname '*.dol' -o -iname '*.raw' -o -iname '*.sav' \) -print -quit | grep -q .; then
   fail "game image found in payload"
 fi
 rm -f "$OUTPUT"

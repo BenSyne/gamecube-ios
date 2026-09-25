@@ -10,9 +10,10 @@ Clone the repo, open it in Codex or Claude Code, and say:
 Build me a GameCube.
 ```
 
-The agent checks your Mac, gives you one honest preparation list, waits for
-`Let's go`, and then builds, tests, signs, installs, and launches a performant
-GameCube/Wii emulator on your own iPhone or iPad.
+The agent checks your Mac, gives you one preparation list, and waits for
+`Let's go`. It then builds and tests the GameCube/Wii emulator and works through
+signing, installation, and launch with your Apple account and device. It reports
+any step that still needs your input or device-specific validation.
 
 Under the hood, this is a tested community performance build of the open-source
 Dolphin/DolphiniOS codebase. It adds a cleaner mobile library, reliable Files
@@ -47,22 +48,27 @@ Build me a GameCube.
 The first response is deliberately a readiness check, not a surprise hour-long
 build. It detects what is already ready and explains anything you still need:
 
-- a local Mac with roughly 20 GB free and Xcode (26.5 is validated);
-- an Apple Account signed into Xcode;
-- an unlocked, trusted iPhone/iPad with Developer Mode enabled;
+- a local Mac with roughly 20 GB free, Xcode (26.5 is validated), and an
+  available iPhone or iPad simulator;
+- for installation on a device, an Apple Account signed into Xcode;
+- for installation on a device, an unlocked, trusted iPhone/iPad with Developer
+  Mode enabled;
 - optional Codex Computer Use access for Xcode/System Settings clicks;
-- the later StikDebug + LocalDevVPN setup required for full-speed JIT.
+- for full-speed play on iOS 17.4 or newer, the later StikDebug + LocalDevVPN
+  setup required for JIT.
 
-When the checklist is green, reply:
+Once required blockers are resolved and you have reviewed any warnings, reply:
 
 ```text
 Let's go.
 ```
 
-The agent then owns the build loop: dependencies, submodules, simulator proof,
-privacy audit, signing, installation, launch, and device validation. It pauses
-only when Apple requires you to sign in, approve trust, enter a passcode, enable
-Developer Mode, or tap the on-device JIT control.
+The agent then works through dependencies, submodules, simulator proof, privacy
+audit, signing, installation, launch, and device validation. The simulator and
+unsigned package passed the August 2026 public-release checks. A signed build,
+installation, and JIT attachment must also pass on your own account and device;
+the agent reports those results separately. You may need to sign in, approve
+trust, enter a passcode, enable Developer Mode, or tap the on-device JIT control.
 
 For a simulator-only proof, ask:
 
@@ -70,16 +76,20 @@ For a simulator-only proof, ask:
 Build GameCube and run the full simulator smoke test.
 ```
 
+Apple signing, a physical device, Developer Mode, and JIT can wait when you only
+want the simulator proof.
+
 ## What to prepare
 
 | Item | What you need |
 | --- | --- |
 | Mac | Local macOS machine; USB/device installation cannot run from a cloud agent |
-| Xcode | Xcode 26.5 is validated; open it once and finish first-launch setup |
+| Xcode | Xcode 26.5 is validated; open it once, finish first-launch setup, and install an iOS Simulator runtime |
+| Simulator test tools | Python 3.10+ and Homebrew; the bootstrap script installs the repo-local fb-idb client and can install missing Homebrew tools with `--install` |
 | Disk | 20 GB free is recommended for source, submodules, dependencies, and derived data |
-| Apple signing | A free Apple Account Personal Team works for personal testing; Apple normally expires its profiles after 7 days. A paid membership is optional |
-| iPhone/iPad | Plugged in, unlocked, trusted, and in Developer Mode |
-| Network | Internet for submodules and pinned build/test dependencies; Wi-Fi for the current on-device JIT flow |
+| Apple signing | For device installation: a free Apple Account Personal Team works for personal testing; Apple normally expires its profiles after 7 days. A paid membership is optional |
+| iPhone/iPad | For device installation: plugged in, unlocked, trusted, and in Developer Mode; the documented full-speed StikDebug path supports iOS 17.4 or newer |
+| Network | Internet for Git submodules and build/test dependencies; Wi-Fi for the current on-device JIT flow |
 | Games | None for testing. Later, use only homebrew or a dump you legally own |
 
 Apple documents free Personal Team device testing and its seven-day limits in
@@ -111,6 +121,7 @@ while it performs the reproducible shell workflow.
 Requirements:
 
 - A Mac with Xcode. Xcode 26.5 is the validated configuration.
+- Python 3.10+ and Homebrew for the automated simulator smoke test.
 - Homebrew.
 - An iPhone or iPad for real GameCube performance.
 - Your own Apple signing identity, or a trusted sideloading tool.
@@ -177,14 +188,19 @@ the [iOS contribution guide](docs/iOS_CONTRIBUTING.md).
 
 ## Install, JIT, and games
 
-Full-speed emulation requires JIT. On a non-jailbroken device, install the app,
-open a game, leave the JIT waiting screen visible, and enable JIT for
-DolphiniOS using the current
-[official StikDebug release](https://github.com/StephenDev0/StikDebug/releases),
-a device pairing file, Wi-Fi, and LocalDevVPN. The game starts automatically
-after attachment is detected. StikDebug is no longer distributed through the
-App Store; follow its current README and the
-[official DolphiniOS JIT guide](https://dolphinios.oatmealdome.me/jit-help).
+Full-speed emulation requires JIT. The documented StikDebug route supports
+iOS 17.4 or newer on a non-jailbroken device. Install the app, open a game,
+leave the JIT waiting screen visible, and enable JIT for DolphiniOS using the
+current [StikDebug release](https://github.com/StikDebug/StikDebug/releases),
+a device pairing file, Wi-Fi, and a loopback VPN such as LocalDevVPN. The game
+starts automatically after attachment is detected. StikDebug is no longer
+distributed through the App Store; follow its
+[current setup instructions](https://github.com/StikDebug/StikDebug/blob/main/README.md).
+StikDebug requires a development-signed target app with `get-task-allow`. The
+signed packaging script checks its own output. If SideStore, AltStore, or another
+tool re-signs the unsigned IPA, that check does not cover the final app: verify
+its entitlement or confirm StikDebug actually attaches before claiming JIT is
+ready.
 
 Treat the pairing file like a credential: do not post it, commit it, or send it
 to an agent. “Continue Without JIT” exists for diagnosis and is far too slow
@@ -210,31 +226,10 @@ This project is not affiliated with or endorsed by Nintendo, the Dolphin
 project, or the DolphiniOS project. “GameCube” is used only to describe
 compatibility.
 
-## Upstream build notes
+## Upstream Dolphin background
 
-## Building
-
-You will need the following:
-
-* A Mac capable of running macOS Big Sur 11.3 or later
-* Xcode 13 or later
-* Homebrew (or your favourite package manager)
-
-First, install the necessary tools using Homebrew:
-
-```
-brew install cmake ninja bartycrouch
-```
-
-If you are using a different package manager, refer to its documentation.
-
-You must change the organization identifier and team ID before you can build!
-
-To change the organization identifier, go to `Project` -> `Config` -> `BundleIdentifier.xcconfig`, and change `use.your.own.organization.identifier` to something unique.
-
-To change the team ID, go to `Project` -> `Config` -> `DevelopmentTeam.xcconfig`, and replace `your-team-id` with your developer account's team ID.
-
-Once finished, you can open the Xcode project at `Source/iOS/App/DolphiniOS.xcodeproj` and build DolphiniOS.
+The material below describes the upstream desktop and Android emulator. For
+this iPhone/iPad build, use the setup instructions above.
 
 # Dolphin - A GameCube and Wii Emulator
 

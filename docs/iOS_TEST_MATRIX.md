@@ -12,17 +12,22 @@ Record the iPhone/iPad model, chip, RAM, iOS version, build commit, IPA SHA-256,
 See [iOS_VALIDATION.md](iOS_VALIDATION.md) for the evidence boundary and
 remaining limitations.
 
+The app targets iOS 14 and newer, but this guide's StikDebug route to full-speed
+JIT supports iOS 17.4 and newer. Treat older-iOS JIT as a separate, unverified
+path. The August 2026 public refresh did not repeat signed Personal Team
+packaging or physical-device installation.
+
 ## Automated gates
 
 | Gate | Expected result |
 | --- | --- |
-| Signed simulator Debug build | `BUILD SUCCEEDED`; app signature validates locally |
+| Ad hoc-signed simulator Debug build | `BUILD SUCCEEDED`; simulator app signature validates locally without an Apple development profile |
 | Generic iOS arm64 build | `BUILD SUCCEEDED`; Mach-O reports arm64 |
 | Unsigned IPA packaging | Payload contains the optimized arm64 app, no stale signature/profile, and has a recorded SHA-256 |
 | Unit tests | All `DolphiniOSTests` pass on an iOS simulator |
 | Library empty state | Import CTA, legal note, and pull-to-refresh work in portrait and landscape |
 | Document import | Registered file URL presents Copy/Move/Cancel; Copy is byte-identical and refreshes the Library |
-| Open-source homebrew smoke | Pinned Wii-donut DOL appears in Library, launches, renders through Metal, and shows the touch overlay |
+| Open-source homebrew smoke | Pinned Wii-donut DOL appears in Library, launches, displays visible graphics in the emulation viewport, and shows the touch overlay |
 | Pause lifecycle | Two screenshots taken two seconds apart while paused decode to identical pixels |
 | Save-state lifecycle | Slot 1 is created with a nonzero size and SHA-256, loads without exit, and survives the return to Library |
 | Stop lifecycle | Confirmed stop ends the core session, keeps the app alive, and restores the Library tab |
@@ -39,8 +44,9 @@ Mark each row Pass, Fail, or Not Tested and attach notes/screenshots.
 
 | Area | Procedure | Acceptance |
 | --- | --- | --- |
-| Install/update | Install signed IPA, then install a newer build over it | App opens; library, settings, and saves remain |
-| JIT | Launch a game, enable with StikDebug, repeat after force-quit | JIT is detected every time; no TXM crash |
+| Personal Team package | Build with Xcode automatic signing for the user's team | Development signature verifies locally and the signed app has `get-task-allow` for StikDebug; record as Not Tested until checked for this account |
+| Install/update | Install a development-signed app, then install a newer build over it | App opens; library, settings, and saves remain; record signing and installation as Not Tested until checked on this device |
+| JIT | For a re-signed IPA, verify the final app has `get-task-allow`; launch a game, enable with StikDebug, and repeat after force-quit | JIT is detected every time; no TXM crash |
 | Import | Import one RVZ and one ISO from Files; relaunch and pull to refresh | Both persist once, with correct metadata |
 | Touch | Play 15 minutes in portrait and landscape; test multi-touch and IR | No stuck inputs; layout stays inside safe areas |
 | Controller | Pair controller; test every GC button, both sticks, analog triggers, rumble, disconnect/reconnect | Correct mapping, no stuck state, reconnect works |

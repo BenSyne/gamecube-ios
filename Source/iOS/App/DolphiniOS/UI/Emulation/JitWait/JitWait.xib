@@ -47,7 +47,7 @@
                                     <rect key="frame" x="0.5" y="0.0" width="334.5" height="264"/>
                                     <string key="text">DolphiniOS is ready and waiting for JIT to be enabled.
 
-On a non-jailbroken iPhone or iPad, open StikDebug 2.3.0 or newer and enable JIT for DolphiniOS. Keep this screen open; emulation starts automatically when JIT is detected.
+On a non-jailbroken iPhone or iPad running iOS 17.4 or newer, use the current StikDebug release from GitHub to enable JIT for DolphiniOS. Follow its guide to set up a pairing file, Wi-Fi, and a loopback VPN. Keep this screen open; emulation starts automatically when JIT is detected.
 
 Continuing without JIT uses the interpreter and is only suitable for troubleshooting.</string>
                                     <fontDescription key="fontDescription" type="system" pointSize="17"/>

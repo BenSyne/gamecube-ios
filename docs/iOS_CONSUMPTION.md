@@ -7,7 +7,8 @@ prompt `Build me a GameCube` starts a read-only readiness check. The agent first
 explains the Mac, Xcode, Apple signing, device, Computer Use, and JIT
 requirements. Reply `Let's go` or `Continue` to authorize dependency setup,
 builds, tests, signing, and installation. The commands below provide the same
-manual path.
+manual path. For a simulator-only proof, Apple signing, a physical device,
+Developer Mode, and JIT can be deferred.
 
 ## What is ready
 
@@ -18,7 +19,7 @@ manual path.
 - A launch preflight warns when Low Power Mode or serious thermal pressure is likely to cause unstable emulation, with explicit options to continue or return to the Library.
 - A current JIT gate that detects attachment and links to the official StikDebug setup guide.
 - No Firebase analytics, crash reporting, service configuration, or upload hook in the personal build.
-- Repeatable signed-simulator and unsigned-device builds, plus an end-to-end open-source homebrew smoke test.
+- Repeatable ad hoc-signed simulator and unsigned-device builds, plus an end-to-end open-source homebrew smoke test.
 
 ## Requirements
 
@@ -30,7 +31,10 @@ manual path.
   re-signs the unsigned IPA. A free Personal Team works for personal testing
   but normally requires reinstalling after seven days; a paid membership is
   optional.
-- Supported hardware starts at A9/iOS 14; a device with at least 4 GB RAM is strongly recommended. Newer Apple silicon gives materially better sustained performance.
+- The app's deployment target starts at iOS 14 on A9 hardware; a device with at
+  least 4 GB RAM is strongly recommended. The full-speed StikDebug procedure
+  documented here supports iOS 17.4 or newer. Older iOS versions need a
+  separately verified JIT method before playable performance can be promised.
 
 Inspect readiness without changing the Mac:
 
@@ -73,7 +77,17 @@ ORG_ID=com.yourname \
 Tools/iOS/package_ipa.sh
 ```
 
-The output is `Artifacts/Release/DolphiniOS.ipa`. The script uses automatic signing and prints a SHA-256 digest. A free developer account generally requires re-signing/reinstalling every seven days; paid-account profiles normally last longer. Apple can change these policies.
+The output is `Artifacts/Release/DolphiniOS.ipa`. The script requests automatic
+signing, checks the signature and its effective `get-task-allow` entitlement,
+and prints a SHA-256 digest. StikDebug needs an Apple development signing
+profile; the script rejects a signature without that entitlement. Signing
+depends on the Apple account, provisioning profile, and connected device. The
+September 2026 public-source refresh validated the simulator and unsigned
+package; it did not re-run signed packaging on a fresh Personal Team. Verify installation and
+launch on your device, then confirm StikDebug attaches before relying on JIT.
+A free developer account generally requires re-signing or reinstalling every
+seven days; paid-account profiles normally last longer. Apple can change these
+policies.
 
 You may instead edit `Source/iOS/App/Project/Config/DevelopmentTeam.xcconfig` and `BundleIdentifier.xcconfig`, open `Source/iOS/App/DolphiniOS.xcodeproj`, select the `DiOS (NJB)` scheme, and run on the connected iPhone or iPad.
 
@@ -83,20 +97,24 @@ If your sideloading tool performs its own signing, create a clean unsigned Relea
 Tools/iOS/bootstrap.sh --mode unsigned
 ```
 
-The output is `Artifacts/Release/DolphiniOS-unsigned.ipa`. It is not directly installable: SideStore, AltStore, or another trusted signing tool must re-sign it with your Apple account and replace the placeholder bundle identifier as needed. The script prints the artifact's SHA-256 digest.
+The output is `Artifacts/Release/DolphiniOS-unsigned.ipa`. It is not directly installable: SideStore, AltStore, or another trusted signing tool must re-sign it with your Apple account and replace the placeholder bundle identifier as needed. The script prints the artifact's SHA-256 digest. Re-signing can change entitlements; see the JIT check below.
 
 ## Install and enable JIT
 
 Install the IPA with SideStore, AltStore Classic, Xcode, or another signing tool you trust. AltStore PAL is not suitable for this build.
 
-Full-speed emulation requires JIT on a non-jailbroken iPhone or iPad. Install
-the current [official StikDebug release](https://github.com/StephenDev0/StikDebug/releases),
+Full-speed emulation requires JIT on a non-jailbroken iPhone or iPad. The
+documented StikDebug procedure supports iOS 17.4 or newer. Install the current
+[StikDebug release](https://github.com/StikDebug/StikDebug/releases),
 create a pairing file with the device unlocked and trusted, connect to Wi-Fi,
 enable LocalDevVPN, start a game in DolphiniOS, and enable JIT for DolphiniOS
 while the waiting screen is open. The game starts automatically when attachment
 is detected. StikDebug is no longer distributed through the App Store. Current
-steps live in the [StikDebug README](https://github.com/StephenDev0/StikDebug/blob/main/README.md)
-and the [official DolphiniOS JIT help page](https://dolphinios.oatmealdome.me/jit-help).
+steps live in the [StikDebug README](https://github.com/StikDebug/StikDebug/blob/main/README.md).
+StikDebug requires `get-task-allow` on the final installed app. The signed
+packaging script checks its own artifact without displaying signing identifiers;
+a sideloading tool's re-signing must be checked on the final app, or proven by
+successful StikDebug attachment before claiming JIT is ready.
 
 The pairing file is device-specific authorization material. Do not upload it,
 send it to an agent, paste its contents into chat, or commit it.
@@ -135,7 +153,7 @@ Dolphin/DolphiniOS is GPL-2.0-or-later. This repository contains the correspondi
 ## Acceptance boundary
 
 The automated simulator test proves build integrity, Library import, app
-navigation, core startup, Metal output, touch controls, pause, save states, and
+navigation, core startup, visible emulator output, touch controls, pause, save states, and
 adaptive portrait/landscape layout. Physical iPhone and iPad testing has also
 proved sideload installation, StikDebug JIT attachment, legal game import, and
 performant execution on the devices recorded in

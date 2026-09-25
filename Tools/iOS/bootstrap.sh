@@ -33,6 +33,18 @@ log() {
   printf '[bootstrap] %s\n' "$*"
 }
 
+find_compatible_python() {
+  local candidate
+  for candidate in python3.14 python3.13 python3.12 python3.11 python3.10 python3; do
+    if command -v "$candidate" >/dev/null 2>&1 &&
+      "$candidate" -c 'import sys; sys.exit(sys.version_info < (3, 10))' >/dev/null 2>&1; then
+      command -v "$candidate"
+      return 0
+    fi
+  done
+  return 1
+}
+
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --mode)
@@ -81,6 +93,9 @@ if [[ "$INSTALL" == 1 ]]; then
   if [[ "$MODE" == "simulator" ]] && ! command -v idb_companion >/dev/null; then
     packages+=(facebook/fb/idb-companion)
   fi
+  if [[ "$MODE" == "simulator" ]] && ! find_compatible_python >/dev/null; then
+    packages+=(python@3.14)
+  fi
   if [[ ${#packages[@]} -gt 0 ]]; then
     log "Installing missing Homebrew packages: ${packages[*]}"
     brew install "${packages[@]}"
@@ -98,15 +113,20 @@ if [[ "$SKIP_SUBMODULES" != 1 ]]; then
 fi
 
 if [[ "$MODE" == "simulator" ]]; then
-  command -v python3 >/dev/null || fail "python3 is required for simulator UI testing"
+  PYTHON_BIN="$(find_compatible_python)" ||
+    fail "Python 3.10+ is required for simulator UI testing. Re-run with --install."
   command -v idb_companion >/dev/null ||
     fail "idb_companion is missing. Re-run with --install."
 
-  IDB_VENV="$ROOT/.build/idb-venv"
-  if [[ ! -x "$IDB_VENV/bin/idb" ]]; then
-    log "Creating the local idb client environment"
-    python3 -m venv "$IDB_VENV"
-    "$IDB_VENV/bin/pip" install --disable-pip-version-check fb-idb
+  IDB_VENV="$ROOT/.build/idb-venv-1.6"
+  if [[ ! -x "$IDB_VENV/bin/idb" ]] ||
+    ! "$IDB_VENV/bin/python" -c 'from importlib.metadata import version; import sys; sys.exit(version("fb-idb") != "1.6.1")' 2>/dev/null; then
+    log "Preparing the local idb 1.6.1 client environment"
+    if [[ ! -x "$IDB_VENV/bin/python" ]]; then
+      "$PYTHON_BIN" -m venv "$IDB_VENV"
+    fi
+    "$IDB_VENV/bin/python" -m pip install --disable-pip-version-check \
+      --index-url https://pypi.org/simple 'fb-idb==1.6.1'
   fi
 
   log "Running the complete simulator smoke test"

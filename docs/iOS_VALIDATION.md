@@ -4,6 +4,36 @@ Validated July 13–25, 2026 against upstream base `7cac54161659` with Xcode
 26.5. This record distinguishes automated simulator coverage from observed
 physical-device behavior; it is not a universal game compatibility claim.
 
+## Public-source hardening — September 25, 2026
+
+Revalidated on a local Mac with Xcode 26.5 against the source intended for the
+next public release:
+
+- The ad hoc-signed iOS simulator build and complete pinned-homebrew smoke flow
+  passed: document import, visible emulation-viewport output, touch navigation,
+  pause, save/load, stop, JIT gate/cancel, and performance preflight/cancel.
+  The screenshot assertion samples the Wii-donut fixture's bright pixels; it
+  does not by itself prove universal Metal or retail-game compatibility.
+- The 22-method `DOLAppVersionTests` simulator suite passed against this app
+  source.
+- The in-app JIT button now opens the current StikDebug GitHub guide. Its
+  updated screen copy was inspected in the rebuilt simulator app.
+- Shell syntax, the Codex/Claude agent contract, whitespace checks, and the
+  full public-source/history audit passed. The inherited self-hosted CI and
+  release automation were replaced with a read-only hosted source check, and
+  an unused inherited Google service configuration was removed from source.
+- A re-signable arm64 unsigned IPA was built and checked for iPhone/iPad
+  support, orientations, archive integrity, and absence of game/save files or
+  stale top-level signing material: 19,613,215 bytes, SHA-256
+  `0d5d986a786b5630b128958c8fb20b9ae6fafcd0a1f0f6f4119e3cb41d1c5f03`.
+
+The September refresh did not include a connected physical device. Apple
+development signing, installation, StikDebug attachment, and real-device
+performance remain unverified for this revision. The signed-package script now
+checks the effective `get-task-allow` entitlement; the check needs a real
+account/device run. A third-party re-signing tool can change entitlements, so
+the installed result needs its own verification or a successful JIT attach.
+
 ## Public-release refresh — August 13, 2026
 
 The agent-native public-release changes were revalidated from the same upstream
@@ -12,7 +42,7 @@ base with Xcode 26.5:
 - Read-only environment readiness and the Codex/Claude two-phase agent contract
   passed.
 - A clean simulator rebuild passed, followed by the complete pinned-homebrew
-  smoke flow: import, launch, Metal output, touch UI, pause, save/load, stop,
+  smoke flow: import, launch, visible emulator output, touch UI, pause, save/load, stop,
   JIT gate, and performance preflight.
 - `DOLAppVersionTests`: 22 passed, 0 failed.
 - A fresh arm64 unsigned device IPA was produced for user-controlled re-signing:
@@ -26,18 +56,20 @@ below remain the July 2026 baseline and were not re-run on August 13.
 
 ## Automated gates passed
 
-- Signed Debug builds on iPad Pro 13-inch (M5) and iPhone 17 Pro iOS 26.5
+- Ad hoc-signed Debug builds on iPad Pro 13-inch (M5) and iPhone 17 Pro iOS 26.5
   simulators.
 - Generic arm64 Debug and optimized Release device builds.
 - `DOLAppVersionTests`: 22 passed, 0 failed.
 - Clean-install smoke test: document-URL import, byte-identical library copy,
-  Library refresh, open-source homebrew launch, Metal output, touch overlay,
+  Library refresh, open-source homebrew launch, visible output, touch overlay,
   pixel-identical paused frames, save-state creation/load, confirmed stop, JIT
   gate/cancel, and Low Power/thermal preflight/cancel.
 - iPhone compact layout in portrait, landscape left, and landscape right.
 - Live rotation with active Metal output and touch controls.
-- Release privacy inspection: no Firebase, Crashlytics, Google service
-  configuration, analytics upload hook, provisioning profile, or game image.
+- App-payload privacy inspection: no Firebase or Crashlytics runtime, Google
+  service configuration in the app bundle, analytics upload hook, provisioning
+  profile, or game image. An unused inherited Google service plist remained in
+  the source tree until the September 2026 hardening pass removed it.
 - Project/plist lint, shell syntax, `git diff --check`, archive integrity, and
   recursive submodule cleanliness.
 

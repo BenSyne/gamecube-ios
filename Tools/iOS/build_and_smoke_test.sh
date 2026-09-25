@@ -17,7 +17,7 @@ FIXTURE="$ROOT/.build/TestFixtures/Wii-donut.c-gc.dol"
 log() { printf '[iOS smoke] %s\n' "$*"; }
 fail() { printf '[iOS smoke] ERROR: %s\n' "$*" >&2; exit 1; }
 
-for tool in xcodebuild xcrun curl shasum sips plutil; do
+for tool in xcodebuild xcrun curl shasum sips plutil python3; do
   command -v "$tool" >/dev/null || fail "$tool is required"
 done
 
@@ -32,12 +32,12 @@ fi
 [[ -n "$UDID" ]] || fail "No available iPhone or iPad simulator. Create one in Xcode or set SMOKE_UDID."
 
 mkdir -p "$ARTIFACTS" "$(dirname "$FIXTURE")" "$PACKAGES"
-log "Using iOS simulator $UDID"
+log "Using an available iOS simulator (identifier hidden)"
 xcrun simctl boot "$UDID" >/dev/null 2>&1 || true
-xcrun simctl bootstatus "$UDID" -b
+xcrun simctl bootstatus "$UDID" -b >/dev/null 2>&1 || fail "Simulator did not finish booting"
 
 if [[ "${SMOKE_SKIP_BUILD:-0}" != "1" ]]; then
-  log "Building signed simulator app"
+  log "Building ad hoc signed simulator app"
   xcodebuild \
     -project "$PROJECT" \
     -scheme 'DiOS (NJB)' \
@@ -49,7 +49,8 @@ if [[ "${SMOKE_SKIP_BUILD:-0}" != "1" ]]; then
     CODE_SIGNING_ALLOWED=YES \
     CODE_SIGNING_REQUIRED=NO \
     CODE_SIGN_IDENTITY=- \
-    build | tee "$ARTIFACTS/build.log"
+    build 2>&1 | sed "s/${UDID}/[redacted simulator]/g" >"$ARTIFACTS/build.log" ||
+      fail "Simulator build failed; inspect the local build log"
 fi
 
 APP="$DERIVED_DATA/Build/Products/Debug (Non-Jailbroken)-iphonesimulator/DolphiniOS.app"
@@ -79,10 +80,10 @@ xcrun simctl terminate "$UDID" "$BUNDLE_ID" >/dev/null 2>&1 || true
 SIMCTL_CHILD_DOL_SUPPRESS_BOOT_NOTICE=1 \
   xcrun simctl launch "$UDID" "$BUNDLE_ID" | tee "$ARTIFACTS/launch.txt"
 sleep 4
-xcrun simctl io "$UDID" screenshot "$ARTIFACTS/library.png"
+xcrun simctl io "$UDID" screenshot "$ARTIFACTS/library.png" >/dev/null 2>&1
 
-IDB="$ROOT/.build/idb-venv/bin/idb"
-command -v "$IDB" >/dev/null || fail "fb-idb is required for the UI tap. Install idb-companion and create .build/idb-venv with fb-idb."
+IDB="${SMOKE_IDB:-$ROOT/.build/idb-venv-1.6/bin/idb}"
+command -v "$IDB" >/dev/null || fail "fb-idb 1.6.1 is required for UI testing. Run Tools/iOS/bootstrap.sh --mode simulator."
 
 COMPANION_PID=""
 cleanup() {
@@ -92,15 +93,23 @@ cleanup() {
 }
 trap cleanup EXIT
 
-if ! "$IDB" list-targets 2>/dev/null | grep -Fq "$UDID"; then
+start_companion() {
   command -v idb_companion >/dev/null || fail "idb_companion is required for UI automation"
-  log "Starting idb companion"
-  idb_companion --udid "$UDID" --grpc-port 10882 --log-file-path "$ARTIFACTS/idb-companion.log" \
-    >>"$ARTIFACTS/idb-companion-stdio.log" 2>&1 &
+  if [[ -n "$COMPANION_PID" ]]; then
+    kill "$COMPANION_PID" >/dev/null 2>&1 || true
+    wait "$COMPANION_PID" >/dev/null 2>&1 || true
+  fi
+  "$IDB" disconnect "$UDID" >/dev/null 2>&1 || true
+  idb_companion --udid "$UDID" --grpc-port 10882 --log-file-path /dev/null \
+    >/dev/null 2>&1 &
   COMPANION_PID=$!
   sleep 3
-  "$IDB" connect localhost 10882 >/dev/null
-fi
+  kill -0 "$COMPANION_PID" >/dev/null 2>&1 ||
+    fail "Simulator UI-test companion exited before connecting"
+  "$IDB" connect localhost 10882 >/dev/null 2>&1 ||
+    fail "Could not connect to the simulator UI-test companion"
+}
+start_companion
 
 accessibility_center_for_value() {
   local json="$1"
@@ -188,6 +197,24 @@ if [[ "${SMOKE_PRESERVE_DATA:-0}" != "1" ]]; then
     sleep 1
     DESCRIPTION="$("$IDB" ui describe-all --udid "$UDID")"
   done
+  if ! accessibility_center_for_value "$DESCRIPTION" AXLabel "Import a Game" AXButton >/dev/null; then
+    log "Simulator accessibility did not respond; restarting that simulator once"
+    kill "$COMPANION_PID" >/dev/null 2>&1 || true
+    wait "$COMPANION_PID" >/dev/null 2>&1 || true
+    COMPANION_PID=""
+    xcrun simctl shutdown "$UDID" >/dev/null 2>&1 || fail "Simulator restart failed"
+    xcrun simctl boot "$UDID" >/dev/null 2>&1 || fail "Simulator restart failed"
+    xcrun simctl bootstatus "$UDID" -b >/dev/null 2>&1 || fail "Simulator restart failed"
+    SIMCTL_CHILD_DOL_SUPPRESS_BOOT_NOTICE=1 \
+      xcrun simctl launch "$UDID" "$BUNDLE_ID" >/dev/null 2>&1 || fail "App relaunch failed"
+    sleep 4
+    start_companion
+    for _ in {1..15}; do
+      DESCRIPTION="$("$IDB" ui describe-all --udid "$UDID")"
+      accessibility_center_for_value "$DESCRIPTION" AXLabel "Import a Game" AXButton >/dev/null && break
+      sleep 1
+    done
+  fi
   accessibility_center_for_value "$DESCRIPTION" AXLabel "Import a Game" AXButton >/dev/null ||
     fail "Clean install did not show Library onboarding"
 fi
@@ -225,7 +252,47 @@ xcrun simctl io "$UDID" screenshot "$ARTIFACTS/import-complete.png" >/dev/null
 log "Launching the first library item"
 "$IDB" ui tap 120 250 --udid "$UDID"
 sleep 8
-xcrun simctl io "$UDID" screenshot "$ARTIFACTS/emulation.png"
+xcrun simctl io "$UDID" screenshot "$ARTIFACTS/emulation.png" >/dev/null 2>&1
+log "Checking for visible homebrew output in the emulation viewport"
+sips -s format bmp "$ARTIFACTS/emulation.png" --out "$ARTIFACTS/emulation.bmp" >/dev/null
+python3 - "$ARTIFACTS/emulation.bmp" <<'PY' || fail "Emulation screenshot has no visible homebrew output"
+import struct
+import sys
+from pathlib import Path
+
+bmp = Path(sys.argv[1]).read_bytes()
+if len(bmp) < 54 or bmp[:2] != b"BM":
+    raise SystemExit("Invalid emulation screenshot bitmap")
+
+offset = struct.unpack_from("<I", bmp, 10)[0]
+width, signed_height = struct.unpack_from("<ii", bmp, 18)
+bits_per_pixel = struct.unpack_from("<H", bmp, 28)[0]
+height = abs(signed_height)
+if width <= 0 or height == 0 or bits_per_pixel not in (24, 32):
+    raise SystemExit("Unsupported emulation screenshot bitmap")
+
+bytes_per_pixel = bits_per_pixel // 8
+row_stride = ((width * bits_per_pixel + 31) // 32) * 4
+if offset + row_stride * height > len(bmp):
+    raise SystemExit("Truncated emulation screenshot bitmap")
+
+# The pinned Wii-donut fixture displays white ASCII graphics. Sample the
+# center of the display, away from the gray on-screen controller buttons.
+bright_pixels = 0
+sampled_pixels = 0
+for y in range(int(height * 0.12), int(height * 0.58), 2):
+    bitmap_y = y if signed_height < 0 else height - 1 - y
+    for x in range(int(width * 0.25), int(width * 0.75), 2):
+        pixel_offset = offset + bitmap_y * row_stride + x * bytes_per_pixel
+        sampled_pixels += 1
+        if min(bmp[pixel_offset:pixel_offset + 3]) >= 200:
+            bright_pixels += 1
+
+if sampled_pixels == 0 or bright_pixels * 250 < sampled_pixels:
+    raise SystemExit("Expected visible Wii-donut pixels in the emulation viewport")
+
+print(f"[iOS smoke] Visible viewport samples: {bright_pixels}/{sampled_pixels}")
+PY
 DESCRIPTION="$("$IDB" ui describe-all --udid "$UDID")"
 if grep -Eq '"AXLabel":"(Warning|Error)"' <<<"$DESCRIPTION"; then
   fail "Core presented a runtime warning or error after launch"
@@ -332,5 +399,5 @@ sleep 3
 DESCRIPTION="$("$IDB" ui describe-all --udid "$UDID")"
 library_is_visible "$DESCRIPTION" || fail "Performance warning cancel did not return to Library"
 
-log "PASS: import, launch, Metal output, touch UI, pause, save/load state, stop, JIT gate, and performance preflight"
+log "PASS: import, launch, visible homebrew output, touch UI, pause, save/load state, stop, JIT gate, and performance preflight"
 log "Artifacts: $ARTIFACTS"

@@ -48,6 +48,20 @@ else
   block "Xcode is not installed or its command-line tools are not selected"
 fi
 
+if command -v xcrun >/dev/null 2>&1; then
+  if simulator_table="$(xcrun simctl list devices available 2>/dev/null)"; then
+    if awk '/iPhone|iPad/ && /\((Booted|Shutdown)\)/ { found = 1 } END { exit !found }' <<<"$simulator_table"; then
+      ok "an available iPhone/iPad simulator is installed (identifiers intentionally hidden)"
+    else
+      block "no available iPhone/iPad simulator; install an iOS Simulator runtime in Xcode > Settings > Components and create a device in Xcode > Window > Devices and Simulators"
+    fi
+  else
+    block "iOS Simulator discovery failed; finish Xcode setup or grant this local agent access to CoreSimulator"
+  fi
+else
+  block "Xcode's xcrun tool is required to discover an iOS Simulator"
+fi
+
 if command -v git >/dev/null 2>&1; then
   ok "Git is available"
 else
@@ -77,6 +91,22 @@ else
   block "Homebrew is needed to install idb-companion"
 fi
 
+python_ready=0
+for candidate in python3.14 python3.13 python3.12 python3.11 python3.10 python3; do
+  if command -v "$candidate" >/dev/null 2>&1 &&
+    "$candidate" -c 'import sys; sys.exit(sys.version_info < (3, 10))' >/dev/null 2>&1; then
+    python_ready=1
+    break
+  fi
+done
+if (( python_ready == 1 )); then
+  ok "Python 3.10+ is available for the current simulator UI-test client"
+elif command -v brew >/dev/null 2>&1; then
+  warn "the agent will install Python 3.10+ for the simulator smoke test after Continue"
+else
+  block "Python 3.10+ and Homebrew are needed for the simulator smoke test"
+fi
+
 free_kb="$(df -Pk "$ROOT" | awk 'NR == 2 {print $4}')"
 if [[ "$free_kb" =~ ^[0-9]+$ ]]; then
   free_gb=$((free_kb / 1024 / 1024))
@@ -103,7 +133,7 @@ fi
 if [[ "$identity_count" =~ ^[1-9][0-9]*$ ]]; then
   ok "an Apple code-signing identity is available (details intentionally hidden)"
 else
-  warn "no Apple signing identity was found; sign in under Xcode > Settings > Accounts"
+  warn "no Apple signing identity was found; check Xcode > Settings > Accounts. Automatic signing may create one during a device build"
 fi
 
 if command -v xcrun >/dev/null 2>&1 && xcrun devicectl list devices --help >/dev/null 2>&1; then
@@ -119,7 +149,7 @@ else
 fi
 
 info "a free Apple Account Personal Team works for personal testing but normally expires after 7 days"
-info "full-speed play requires current StikDebug setup, a pairing file, Wi-Fi, and LocalDevVPN"
+info "the documented full-speed StikDebug setup supports iOS 17.4+ and requires a development-signed app with get-task-allow, a pairing file, Wi-Fi, and LocalDevVPN"
 info "Codex Computer Use is optional for shell builds and recommended for Xcode/System Settings UI steps"
 info "commercial games are never downloaded; import only a dump you legally own after installation"
 

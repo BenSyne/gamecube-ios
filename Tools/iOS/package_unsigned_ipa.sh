@@ -60,7 +60,8 @@ rm -f "$STAGE/Payload/DolphiniOS.app/embedded.mobileprovision" "$OUTPUT"
 [[ ! -e "$STAGE/Payload/DolphiniOS.app/embedded.mobileprovision" ]] || fail "stale provisioning profile remains"
 if find "$STAGE/Payload/DolphiniOS.app" -type f \( \
   -iname '*.iso' -o -iname '*.gcm' -o -iname '*.rvz' -o -iname '*.wbfs' -o \
-  -iname '*.wia' -o -iname '*.gcz' \) -print -quit | grep -q .; then
+  -iname '*.wia' -o -iname '*.gcz' -o -iname '*.ciso' -o -iname '*.wad' -o \
+  -iname '*.dol' -o -iname '*.raw' -o -iname '*.sav' \) -print -quit | grep -q .; then
   fail "game image found in payload"
 fi
 
